@@ -9,12 +9,8 @@
     <ul v-if="weatherData && errors.length===0" class="forecast">
       <li v-for="forecast in weatherData.list">
         <h3>{{ forecast.dt|formatDate }}</h3>
-        <!-- TODO: Make weather summary be in a child component. -->
-        <div v-for="weatherSummary in forecast.weather" class="weatherSummary">
-            <img v-bind:src="'http://openweathermap.org/img/w/' + weatherSummary.icon + '.png'" v-bind:alt="weatherSummary.main">
-            <br>
-            <b>{{ weatherSummary.main }}</b>
-        </div>
+        
+        <weather-summary v-bind:weatherData="forecast.weather"></weather-summary>
         <!-- TODO: Make dl of weather data be in a child component. -->
         <dl>
             <dt>Humidity</dt>
@@ -39,7 +35,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import {API} from '@/common/api';
+import WeatherSummary from '@/components/WeatherSummary';
 
 export default {
   name: 'Forecast',
@@ -51,13 +48,10 @@ export default {
     }
   },
   created () {
-    // TODO: Improve base config for API
-    axios.get('//api.openweathermap.org/data/2.5/forecast', {
+      API.get('forecast', {
       params: {
           id: this.$route.params.cityId,
-          units: 'imperial',
-          APPID: 'YOUR_APPID_HERE'
-      }
+       }
     })
     .then(response => {
       this.weatherData = response.data
@@ -119,10 +113,7 @@ li {
 a {
   color: #42b983;
 }
-.weatherSummary {
-  display: inline-block;
-  width: 100px;
-}
+
 dl {
   padding: 5px;
   background: #e8e8e8;

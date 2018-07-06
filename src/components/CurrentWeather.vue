@@ -7,22 +7,18 @@
     </p>
     <div v-if="weatherData && errors.length===0">
 
-      <!-- TODO: Make weather summary be in a child component. -->
-      <div v-for="weatherSummary in weatherData.weather" class="weatherSummary">
-          <img v-bind:src="'http://openweathermap.org/img/w/' + weatherSummary.icon + '.png'" v-bind:alt="weatherSummary.main">
-          <br>
-          <b>{{ weatherSummary.main }}</b>
-      </div>
-      <!-- TODO: Make dl of weather data be in a child component. -->
+      <weather-summary v-bind:weatherData="weatherData.weather"></weather-summary>
+      
+      <weather-data v-bind:weatherData="weatherData.main"></weather-data>
       <dl>
           <dt>Current Temp</dt>
-          <dd>{{ weatherData.main.temp }}&deg;F</dd>
+          <dd>{{ weatherData.main.temp }}&deg;C</dd>
           <dt>Humidity</dt>
           <dd>{{ weatherData.main.humidity }}%</dd>
           <dt>High</dt>
-          <dd>{{ weatherData.main.temp_max }}&deg;F</dd>
+          <dd>{{ weatherData.main.temp_max }}&deg;C</dd>
           <dt>Low</dt>
-          <dd>{{ weatherData.main.temp_min }}&deg;F</dd>
+          <dd>{{ weatherData.main.temp_min }}&deg;C</dd>
       </dl>
     </div>
     <div v-else-if="errors.length > 0">
@@ -38,7 +34,9 @@
 </template>
 
 <script>
-import axios from 'axios';
+import {API} from '@/common/api';
+import WeatherSummary from '@/components/WeatherSummary';
+import WeatherData from '@/components/WeatherData';
 
 export default {
   name: 'CurrentWeather',
@@ -50,13 +48,10 @@ export default {
     }
   },
   created () {
-    // TODO: Improve base config for API
-    axios.get('//api.openweathermap.org/data/2.5/weather', {
+    API.get('weather', {
       params: {
           id: this.$route.params.cityId,
-          units: 'imperial',
-          APPID: 'YOUR_APPID_HERE'
-      }
+        }
     })
     .then(response => {
       this.weatherData = response.data
@@ -64,7 +59,12 @@ export default {
     .catch(error => {
       this.errors.push(error)
     });
+  },
+  components: {
+    'weather-summary': WeatherSummary,
+    'weather-data': WeatherData
   }
+
 }
 </script>
 
@@ -89,29 +89,6 @@ li {
   min-height: 300px;
   border: solid 1px #e8e8e8;
   padding: 10px;
-}
-.weatherSummary {
-  display: inline-block;
-  width: 100px;
-}
-dl {
-  padding: 5px;
-  background: #e8e8e8;
-}
-dt {
-  float: left;
-  clear: left;
-  width: 120px;
-  text-align: right;
-  font-weight: bold;
-  color: blue;
-}
-dd {
-  margin: 0 0 0 130px;
-  padding: 0 0 0.5em 0;
-}
-dt::after {
-  content: ":";
 }
 a {
   color: #42b983;
